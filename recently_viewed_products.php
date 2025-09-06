@@ -1,3 +1,5 @@
+<?php
+
 /**
  * @snippet       [recently_viewed_products] Shortcode - WooCommerce
  * @how-to        businessbloomer.com/woocommerce-customization
