@@ -1,0 +1,5 @@
+# thêm vào attr
+uk-slider="autoplay: true; autoplay-interval: 0; easing: linear; velocity: 0.03"
+
+
+bỏ easing: linear sẽ chạy từng khúc một
