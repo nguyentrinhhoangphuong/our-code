@@ -1,3 +1,4 @@
+// ======================================== sửa dotnav ==============================
 // cách 1
 document.addEventListener("DOMContentLoaded", () => {
   const sliderEl = document.querySelector(".slider-lien-ket-khu-vuc.uk-slider");
@@ -145,7 +146,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 
-// ======================================================== sửa slide nav
+// ======================================================== sửa slide nav =============================================
 document.addEventListener('DOMContentLoaded', function () {
   const dotnavs = document.querySelectorAll('.uk-slider-nav.uk-dotnav');
 
@@ -192,4 +193,17 @@ document.addEventListener('DOMContentLoaded', function () {
 	color: #CC2028 !important;
 	background: transparent !important;
 	margin: 0 8px !important;
+}
+
+
+
+
+
+// ======================================== hover đổi màu mũi tên ==================================
+.el-slidenav svg path {
+  transition: stroke 0.3s ease;
+}
+
+.el-slidenav:hover svg path {
+  stroke: #5e977e;
 }
