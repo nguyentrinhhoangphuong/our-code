@@ -1,0 +1,65 @@
+.el-meta,
+.el-title,
+.el-link {
+  position: relative;
+  z-index: 2;
+  transition: transform 0.3s ease;
+}
+
+.el-item {
+  position: relative;
+  overflow: hidden;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.el-item::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 40%;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, #000000 160%);
+  z-index: 1;
+}
+
+
+.el-item::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+
+  background-image:
+    url('http://viethuong.jupitermedia.com.vn/wp-content/uploads/2025/09/Frame-1.svg'),
+    /* top-left */
+    url('http://viethuong.jupitermedia.com.vn/wp-content/uploads/2025/09/Frame.svg'),
+    /* bottom-right */
+    linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, rgba(203, 32, 38, 0.8) 74.04%);
+  /* red overlay */
+
+  background-repeat: no-repeat, no-repeat, no-repeat;
+  background-position: top left, bottom right, center;
+  opacity: 0;
+  z-index: 1;
+  transition: opacity 0.3s ease;
+}
+
+
+.el-item:hover::before {
+  opacity: 1;
+  cursor: pointer;
+}
+
+.el-item:hover .el-meta,
+.el-item:hover .el-title,
+.el-item:hover .el-link {
+  transform: translateY(-50px);
+}
+
+.el-item .uk-panel {
+  padding: 20px 10px !important;
+}
