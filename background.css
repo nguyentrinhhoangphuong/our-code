@@ -63,3 +63,48 @@
 .el-item .uk-panel {
   padding: 20px 10px !important;
 }
+
+
+//=================================================================
+.el-section {
+  position: relative;
+  overflow: hidden;
+}
+/* Background dưới trái */
+.el-section::before {
+  content:"";
+  position:absolute;
+  left: -70px; 
+  bottom: -160px;
+  width: 480px; 
+  height: 480px;
+  background: 
+    rgba(255,255,255,0.75)  /* tăng lớp phủ trắng từ 0.6 lên 0.85 */
+    url('http://viethuong.jupitermedia.com.vn/wp-content/uploads/2025/09/58a41fded7cff2baa4ffbb803bbf1da4b2b35f17.png')
+    no-repeat center/contain;
+  background-blend-mode: lighten;
+  z-index:0;
+  opacity:0.4; /* giảm opacity từ 0.9 xuống 0.4 */
+}
+/* Background trên phải */
+.el-section::after {
+  content:"";
+  position:absolute;
+  right: -70px;
+  top: -160px;
+  width: 480px;
+  height: 480px;
+  background: 
+    rgba(255,255,255,0.75) /* tăng lớp phủ trắng từ 0.6 lên 0.85 */
+    url('http://viethuong.jupitermedia.com.vn/wp-content/uploads/2025/09/58a41fded7cff2baa4ffbb803bbf1da4b2b35f17.png')
+    no-repeat center/contain;
+  background-blend-mode: lighten;
+  transform: rotate(180deg);
+  z-index:0;
+  opacity:0.4; /* giảm opacity từ 0.9 xuống 0.4 */
+}
+/* Nội dung phía trên */
+.el-section > * {
+  position: relative;
+  z-index: 1;
+}
