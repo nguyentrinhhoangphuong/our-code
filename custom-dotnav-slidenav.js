@@ -140,3 +140,56 @@ document.addEventListener("DOMContentLoaded", () => {
 //   background-color: #eae6df;
 //   transition: transform 0.3s ease, opacity 0.3s ease, background-color 0.3s ease;
 // }
+
+
+
+
+
+// ======================================================== sửa slide nav
+document.addEventListener('DOMContentLoaded', function () {
+  const dotnavs = document.querySelectorAll('.uk-slider-nav.uk-dotnav');
+
+  dotnavs.forEach(function (dotnav) {
+    const slider = dotnav.closest('.uk-slider-container');
+    if (!slider) return;
+
+    const prev = document.createElement('a');
+    prev.className = 'uk-slidenav-previous uk-icon';
+    prev.setAttribute('uk-slider-item', 'previous');
+    prev.innerHTML = '<span uk-icon="icon: chevron-left"></span>';
+
+    const next = document.createElement('a');
+    next.className = 'uk-slidenav-next uk-icon';
+    next.setAttribute('uk-slider-item', 'next');
+    next.innerHTML = '<span uk-icon="icon: chevron-right"></span>';
+
+    const navWrapper = document.createElement('div');
+    navWrapper.className = 'custom-nav-wrapper';
+
+    navWrapper.appendChild(prev);
+    navWrapper.appendChild(dotnav);
+    navWrapper.appendChild(next);
+
+    slider.appendChild(navWrapper);
+  });
+});
+
+.custom-nav-wrapper {
+	display: flex !important;
+	justify-content: center !important;
+	align-items: center !important;
+	width: 100% !important;
+    margin-top: 36px;
+}
+
+.custom-nav-wrapper .uk-slidenav-previous,
+.custom-nav-wrapper .uk-slidenav-next {
+	position: static !important;
+	transform: none !important;
+	display: inline-flex !important;
+	align-items: center !important;
+	justify-content: center !important;
+	color: #CC2028 !important;
+	background: transparent !important;
+	margin: 0 8px !important;
+}
