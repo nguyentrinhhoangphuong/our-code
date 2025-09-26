@@ -32,3 +32,37 @@ function sale_badge_percentage() {
    if ( $max_percentage > 0 ) echo "<span class='onsale'>-" . round($max_percentage) . "%</span>";
 }
 add_action( 'woocommerce_sale_flash', 'sale_badge_percentage', 25 );
+
+// lấy tên danh mục
+function get_current_category_name_shortcode($atts = []) {
+    $atts = shortcode_atts([
+        'fallback' => 'Sản phẩm',
+        'uppercase' => 'false',  
+        'prefix' => '',          
+        'suffix' => '',      
+    ], $atts);
+    
+    $category_name = '';
+    
+    // Kiểm tra xem có đang ở product category page không
+    if (is_product_category()) {
+        $current_category = get_queried_object();
+        
+        if ($current_category && !is_wp_error($current_category)) {
+            $category_name = $current_category->name;
+        }
+    }
+    
+    if (empty($category_name)) {
+        $category_name = $atts['fallback'];
+    }
+    
+    if ($atts['uppercase'] === 'true') {
+        $category_name = strtoupper($category_name);
+    }
+    
+    $result = $atts['prefix'] . $category_name . $atts['suffix'];
+    
+    return esc_html($result);
+}
+add_shortcode('current_category_name', 'get_current_category_name_shortcode');
