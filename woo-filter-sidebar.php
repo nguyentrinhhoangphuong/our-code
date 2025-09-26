@@ -98,13 +98,23 @@ add_shortcode('price_range_slider_filter', 'custom_price_range_slider_filter_sho
 
 // danh mục
 function custom_category_accordion_shortcode() {
-    $categories = get_terms( array(
+    $categories = get_terms([
         'taxonomy' => 'product_cat',
         'hide_empty' => true,
-    ) );
+    ]);
 
-    $base_url = wc_get_page_permalink( 'shop' );
-    $selected_categories = isset( $_GET['filter_loai-san-pham'] ) ? explode( ',', sanitize_text_field( $_GET['filter_loai-san-pham'] ) ) : array();
+    $base_url = wc_get_page_permalink('shop');
+    $selected_categories = isset($_GET['filter_loai-san-pham']) 
+        ? explode(',', sanitize_text_field($_GET['filter_loai-san-pham'])) 
+        : [];
+    
+    $current_category_slug = '';
+    if (is_product_category()) {
+        $current_category = get_queried_object();
+        if ($current_category && !is_wp_error($current_category)) {
+            $current_category_slug = $current_category->slug;
+        }
+    }
 
     $output = '<ul uk-accordion="multiple: true" class="uk-accordion">';
     $output .= '<li class="uk-open">';
@@ -112,32 +122,41 @@ function custom_category_accordion_shortcode() {
     $output .= '<div class="uk-accordion-content">';
     $output .= '<ul class="uk-child-width-1-2" uk-grid>';
 
-    if ( ! empty( $categories ) && ! is_wp_error( $categories ) ) {
-        foreach ( $categories as $category ) {
-            $is_selected = in_array( $category->slug, $selected_categories );
-
-            $new_categories = $is_selected 
-                ? array_diff( $selected_categories, array( $category->slug ) )
-                : array_merge( $selected_categories, array( $category->slug ) ); 
-            $new_categories = array_unique( $new_categories );
-
-            $query_args = array();
-            if ( ! empty( $new_categories ) ) {
-                $query_args['filter_loai-san-pham'] = implode( ',', $new_categories );
+    if (!empty($categories) && !is_wp_error($categories)) {
+        foreach ($categories as $category) {            
+            if (is_product_category()) {
+                $is_selected = ($category->slug === $current_category_slug);
+            } else {
+                $is_selected = in_array($category->slug, $selected_categories);
             }
+            
+            if (is_product_category()) {
+                $category_url = get_term_link($category);
+            } else {
+                $new_categories = $is_selected 
+                    ? array_diff($selected_categories, [$category->slug])
+                    : array_merge($selected_categories, [$category->slug]);
+                $new_categories = array_unique($new_categories);
 
-            if ( ! empty( $_GET ) ) {
-                foreach ( $_GET as $key => $value ) {
-                    if ( strpos( $key, 'filter_' ) === 0 && $key !== 'filter_loai-san-pham' ) {
-                        $query_args[$key] = $value;
+                $query_args = [];
+                if (!empty($new_categories)) {
+                    $query_args['filter_loai-san-pham'] = implode(',', $new_categories);
+                }
+
+                // Giữ các filter khác
+                if (!empty($_GET)) {
+                    foreach ($_GET as $key => $value) {
+                        if (strpos($key, 'filter_') === 0 && $key !== 'filter_loai-san-pham') {
+                            $query_args[$key] = $value;
+                        }
                     }
                 }
+
+                $category_url = add_query_arg($query_args, $base_url);
             }
 
-            $category_url = add_query_arg( $query_args, $base_url );
-
             $active = $is_selected ? 'uk-button-primary' : 'uk-button-default';
-            $output .= '<li><button class="uk-button '.$active.' uk-width-1-1 filter-custom-button" uk-tooltip="'.esc_html( $category->name ).'" type="button" onclick="window.location.href=\'' . esc_url( $category_url ) . '\'">' . esc_html( $category->name ) . '</button></li>';
+            $output .= '<li><button class="uk-button ' . $active . ' uk-width-1-1 filter-custom-button" uk-tooltip="' . esc_html($category->name) . '" type="button" onclick="window.location.href=\'' . esc_url($category_url) . '\'">' . esc_html($category->name) . '</button></li>';
         }
     } else {
         $output .= '<li>Không có danh mục nào.</li>';
@@ -150,7 +169,8 @@ function custom_category_accordion_shortcode() {
 
     return $output;
 }
-add_shortcode( 'category_accordion', 'custom_category_accordion_shortcode' );
+add_shortcode('category_accordion', 'custom_category_accordion_shortcode');
+
 
 // các dm còn lại
 function dynamic_taxonomy_filter_accordion_shortcode() {
