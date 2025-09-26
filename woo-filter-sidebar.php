@@ -386,3 +386,102 @@ function custom_ordering_select_shortcode() {
     return ob_get_clean();
 }
 add_shortcode('custom_ordering', 'custom_ordering_select_shortcode');
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  let offcanvas = document.querySelector('#tm-element-woo-filter-offcanvas .uk-offcanvas-bar');
+  let shortcodeOrder = ['hidden-get_all_category_accordion', 'hidden-price-filter', 'hidden-category-accordion', 'text-bo-loc-tim-kiem'];
+  if (offcanvas) {
+    shortcodeOrder.forEach(function (id) {
+      let hidden = document.getElementById(id);
+      if (hidden) {
+        offcanvas.insertAdjacentHTML('afterbegin', hidden.innerHTML);
+      }
+    });
+  }
+});
+
+
+document.addEventListener('DOMContentLoaded', function() {
+  const button = document.querySelector('.custom-dropdown-button');
+  const labels = {
+    popularity: 'Hàng bán chạy',
+    rating: 'Giảm nhiều nhất',
+    date: 'Hàng mới về',
+    price: 'Giá tăng dần',
+    'price-desc': 'Giá giảm dần',
+    menu_order: 'Tất cả'
+  };
+
+  const currentParams = new URLSearchParams(window.location.search);
+  const currentOrderby = currentParams.get('orderby') || 'menu_order';
+  if (button && labels[currentOrderby]) {
+    button.textContent = labels[currentOrderby];
+  }
+
+  document.querySelectorAll('[data-orderby]').forEach(link => {
+    currentParams.set('orderby', link.dataset.orderby);
+    link.href = '?' + currentParams.toString();
+  });
+});
+
+    
+document.addEventListener('DOMContentLoaded', function () {
+  const filterLists = document.querySelectorAll('.woocommerce-widget-layered-nav-list');
+
+  filterLists.forEach(list => {
+    list.classList.add('uk-grid', 'uk-child-width-1-2');
+    list.setAttribute('uk-grid', '');
+
+    const checkboxes = list.querySelectorAll('input[type="checkbox"]');
+
+    checkboxes.forEach(checkbox => {
+      const label = checkbox.closest('label');
+      if (!label) return;
+
+      const listItem = label.closest('li');
+      if (!listItem) return;
+
+      listItem.classList.add('uk-panel', 'filter-button-item');
+
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'uk-button uk-button-default uk-width-1-1 filter-custom-button';
+      button.setAttribute('uk-tooltip', label.textContent.trim());
+      button.textContent = label.textContent.trim();
+
+      button.addEventListener('click', function () {
+        checkbox.checked = !checkbox.checked;
+        this.classList.toggle('uk-button-primary', checkbox.checked);
+        this.classList.toggle('uk-button-default', !checkbox.checked);
+
+        const event = new Event('change', { bubbles: true });
+        checkbox.dispatchEvent(event);
+      });
+
+      label.parentNode.replaceChild(button, label);
+      checkbox.style.display = 'none';
+      button.parentNode.appendChild(checkbox);
+
+      if (checkbox.checked) {
+        button.classList.remove('uk-button-default');
+        button.classList.add('uk-button-primary');
+      }
+    });
+  });
+});    
+</script>
