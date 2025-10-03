@@ -1,4 +1,13 @@
 <?php
+// ẩn nút read more khi không có giá
+add_filter( 'woocommerce_loop_add_to_cart_link', 'hide_read_more_button_for_no_price', 10, 2 );
+function hide_read_more_button_for_no_price( $button, $product ) {
+    if ( ! $product->get_price() ) {
+        return ''; 
+    }
+    return $button;
+}
+
 // custom đơn vị tiền
 function change_existing_currency_symbol( $currency_symbol, $currency ) {
     switch( $currency ) {
