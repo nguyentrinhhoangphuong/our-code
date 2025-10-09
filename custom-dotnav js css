@@ -1,0 +1,72 @@
+document.addEventListener('DOMContentLoaded', function () {
+  const dotnavs = document.querySelectorAll('.uk-slider-nav.uk-dotnav');
+
+  dotnavs.forEach(function (dotnav) {
+    const slider = dotnav.closest('.uk-slider-container');
+
+
+    const prev = document.createElement('a');
+    prev.className = 'uk-slidenav-previous uk-icon';
+    prev.setAttribute('uk-slider-item', 'previous');
+    prev.innerHTML = '<span uk-icon="icon: chevron-left"></span>';
+
+    const next = document.createElement('a');
+    next.className = 'uk-slidenav-next uk-icon';
+    next.setAttribute('uk-slider-item', 'next');
+    next.innerHTML = '<span uk-icon="icon: chevron-right"></span>';
+
+    const navWrapper = document.createElement('div');
+    navWrapper.className = 'custom-nav-wrapper';
+
+    navWrapper.appendChild(prev);
+    navWrapper.appendChild(dotnav);
+    navWrapper.appendChild(next);
+
+    slider.appendChild(navWrapper);
+  });
+});
+
+// active có border bên ngoài
+// 1: ======================================================
+.uk-dotnav li a {
+  background: #EAB42C;
+  transition: all 0.3s ease;
+  padding: 0 !important;
+  outline: 2px solid transparent; /* Thêm outline transparent cho tất cả */
+  outline-offset: 3px;
+}
+
+.uk-dotnav li.uk-active a {
+  background: #EAB42C;
+  outline-color: #EAB42C; /* Chỉ thay đổi màu outline */
+}
+
+// 2: =======================================================
+.uk-dotnav li a {
+  background: #EAB42C;
+  transition: all 0.3s ease;
+  padding: 0 !important;
+  box-shadow: 0 0 0 3px transparent, 0 0 0 5px transparent; /* Shadow trong suốt */
+}
+
+.uk-dotnav li.uk-active a {
+  background: #EAB42C;
+  box-shadow: 0 0 0 3px #fff, 0 0 0 5px #EAB42C; /* Shadow hiển thị */
+}
+
+// active kéo dài
+.uk-dotnav li a {
+  display: block;
+  width: 18px;
+  height: 5px;
+  border-radius: 10px;
+  background: #e5ecec;
+  transition: all 0.3s ease;
+  padding: 0 !important;
+}
+
+.uk-dotnav li.uk-active a {
+  width: 36px;
+  background: #004d4d;
+}
+
