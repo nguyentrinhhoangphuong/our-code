@@ -1,53 +1,66 @@
-
-
-
-
-.el-column #template-9uOP0PfD\#2 {
-    position: sticky;
-    top: 0;
-    background: #fff;     
-    z-index: 20;           
-    width: 100%;          
-    box-sizing: border-box;
-	padding: 8px 12px;
-	border-bottom: 1px solid #cc2028;
-}
-
-
-.el-column #template-9uOP0PfD\#7 {
-	position: sticky;
-	top: 100px;
-	right: 0;
-	z-index: 10;
-	height: calc(100vh - 100px);
-	overflow-y: auto;
-}
-
-.el-column{
-	display: none;
-}
-
-@media (min-width: 960px) {
-    .el-column {
-        display: block;
+add_action('wp_footer', function() {
+    ?>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Lấy video-box gốc
+        const videoBox = document.querySelector('.video-box');
+        
+        if (videoBox) {
+            // Tạo lightbox container
+            const lightboxWrapper = document.createElement('div');
+            lightboxWrapper.className = 'uk-width-expand@m';
+            lightboxWrapper.setAttribute('uk-lightbox', 'video-autoplay: true');
+            
+            // Lấy tất cả video trong video-box
+            const videos = videoBox.querySelectorAll('video');
+            
+            videos.forEach(function(video) {
+                const videoSrc = video.getAttribute('src');
+                const poster = video.getAttribute('poster');
+                
+                if (videoSrc && videoSrc !== '#') {
+                    // Tạo div wrapper
+                    const div = document.createElement('div');
+                    div.className = 'uk-margin-small video-light-box';
+                    
+                    // Tạo link
+                    const link = document.createElement('a');
+                    link.href = videoSrc;
+                    if (poster) {
+                        link.setAttribute('data-poster', poster);
+                    }
+                    link.setAttribute('data-attrs', 'width: 1920; height: 1080;');
+                    
+                    // Clone video
+                    const clonedVideo = video.cloneNode(true);
+                    
+                    // Ghép lại
+                    link.appendChild(clonedVideo);
+                    div.appendChild(link);
+                    lightboxWrapper.appendChild(div);
+                }
+            });
+            
+            // Ẩn video-box gốc
+            videoBox.style.display = 'none';
+            
+            // Insert lightbox vào sau video-box
+            videoBox.parentNode.insertBefore(lightboxWrapper, videoBox.nextSibling);
+        }
+    });
+    </script>
+    <style>
+    /* Full width & height cho lightbox video */
+    .uk-lightbox-items > * > video {
+        width: 100vw !important;
+        height: 100vh !important;
+        object-fit: contain;
     }
-	.el-column .wrapper-inner{
-		display: block;
-		border: 1px solid #e4e4e4;
-		border-radius: 8px;
-		padding: 0px 4px 0px 12px;
-		height: 80vh;
-		overflow-x: hidden;
-	}
-
-	.el-column .wrapper-inner::-webkit-scrollbar {
-		width: 4px;
-	}
-
-	.el-column .wrapper-inner::-webkit-scrollbar-thumb {
-		height: 60px;
-		background-color: #c4c4c4;
-		border-radius: 20px;
-		opacity: 1;
-	}
-}
+    
+    .uk-lightbox-items > * {
+        max-width: 100vw !important;
+        max-height: 100vh !important;
+    }
+    </style>
+    <?php
+});
