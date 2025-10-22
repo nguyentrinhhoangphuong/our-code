@@ -1,0 +1,106 @@
+<div class="uk-inline lang-switcher-desktop">
+    
+  <button type="button" class="uk-button uk-button-default">
+    <img src="/wp-content/uploads/2025/10/Frame-7.svg" alt="flag-usa" class="flag-icon" id="desktop-current-flag"/>
+  </button>
+    
+    
+  <div uk-dropdown="mode: click; pos: bottom-center">
+    <ul class="uk-list lang-dropdown">
+      <li>
+        <a href="#" onclick="switchLanguageDesktop('en|vi'); return false;" class="uk-flex uk-flex-middle gap-2">
+          VI
+          <img src="/wp-content/uploads/2025/10/vnflat.svg" alt="Vietnamese" style="width:24px; height:24px;"/>
+        </a>
+      </li>
+      
+        <li>
+        <a href="#" onclick="switchLanguageDesktop('en|en'); return false;" class="uk-flex uk-flex-middle gap-2">
+          EN
+          <img src="/wp-content/uploads/2025/10/Frame-7.svg" alt="English" style="width:24px; height:24px;"/>
+        </a>
+      </li>
+        
+        
+    </ul>
+  </div>
+</div>
+
+<script>
+// Desktop version - riêng biệt với mobile
+(function() {
+  // Lưu ngôn ngữ hiện tại
+  let currentLangDesktop = localStorage.getItem('selectedLanguage') || 'en';
+
+  // Cấu hình flags
+  const flagsDesktop = {
+    'en': '/wp-content/uploads/2025/10/Frame-7.svg',
+    'vi': '/wp-content/uploads/2025/10/vnflat.svg'
+  };
+
+  // Hàm khởi tạo ngôn ngữ khi load trang
+  function initLanguageDesktop() {
+    const flagImg = document.getElementById('desktop-current-flag');
+    if (flagImg && flagsDesktop[currentLangDesktop]) {
+      flagImg.src = flagsDesktop[currentLangDesktop];
+      flagImg.alt = currentLangDesktop === 'en' ? 'flag-usa' : 'flag-vietnam';
+    }
+    
+    // Nếu đã lưu là tiếng Việt, set cookie
+    if (currentLangDesktop === 'vi') {
+      const domain = window.location.hostname;
+      document.cookie = `googtrans=/en/vi; path=/; domain=${domain}`;
+      document.cookie = `googtrans=/en/vi; path=/`;
+    }
+  }
+
+  // Hàm chuyển đổi ngôn ngữ - expose ra global scope
+  window.switchLanguageDesktop = function(langPair) {
+    // Lấy ngôn ngữ đích từ cặp 'en|vi' hoặc 'en|en'
+    const targetLang = langPair.split('|')[1];
+    
+    // Cập nhật currentLang
+    currentLangDesktop = targetLang;
+    localStorage.setItem('selectedLanguage', targetLang);
+    
+    // Cập nhật icon cờ
+    const flagImg = document.getElementById('desktop-current-flag');
+    if (flagImg && flagsDesktop[targetLang]) {
+      flagImg.src = flagsDesktop[targetLang];
+      flagImg.alt = targetLang === 'en' ? 'flag-usa' : 'flag-vietnam';
+    }
+    
+    // Đóng dropdown trước (nếu dùng UIkit)
+    if (typeof UIkit !== 'undefined') {
+      const dropdown = document.querySelector('.lang-switcher-desktop [uk-dropdown]');
+      if (dropdown) {
+        UIkit.dropdown(dropdown).hide();
+      }
+    }
+    
+    // Set cookie googtrans
+    const domain = window.location.hostname;
+    document.cookie = `googtrans=/en/${targetLang}; path=/; domain=${domain}`;
+    document.cookie = `googtrans=/en/${targetLang}; path=/`;
+    
+    // Nếu chuyển về tiếng Anh, xóa cookie
+    if (targetLang === 'en') {
+      document.cookie = `googtrans=; path=/; domain=${domain}; expires=Thu, 01 Jan 1970 00:00:00 UTC`;
+      document.cookie = `googtrans=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC`;
+    }
+    
+    // Reload trang để apply translation
+    setTimeout(() => {
+      history.replaceState(null, null, window.location.pathname + window.location.search);
+      window.location.reload();
+    }, 100);
+  };
+
+  // Khởi tạo khi trang load
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initLanguageDesktop);
+  } else {
+    initLanguageDesktop();
+  }
+})();
+</script>
