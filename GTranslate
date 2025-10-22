@@ -1,3 +1,18 @@
+// ẩn gtranslate mặc định 
+.gtranslate_wrapper {
+  position: fixed !important;
+  left: -9999px !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+// để ẩn logo tranelate khi dịch
+.VIpgJd-ZVi9od-aZ2wEe-wOHMyf {
+  display: none !important;
+}
+
+============================================
+
 <div class="uk-inline lang-switcher-desktop">
     
   <button type="button" class="uk-button uk-button-default">
