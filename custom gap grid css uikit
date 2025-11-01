@@ -1,0 +1,7 @@
+.el-element .uk-grid-match[uk-grid] {
+    margin-left: -36px !important;
+}
+
+.el-element .uk-grid-match > div {
+    padding-left: 36px !important;
+}
