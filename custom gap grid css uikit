@@ -1,7 +1,11 @@
-.el-element .uk-grid-match[uk-grid] {
-    margin-left: -36px !important;
-}
-
-.el-element .uk-grid-match > div {
-    padding-left: 36px !important;
-}
+    /* Column gap */
+    .el-element .uk-grid-match[uk-grid] {
+        margin-left: -14px !important;
+    }
+    .el-element .uk-grid-match > div {
+        padding-left: 14px !important;
+    }
+    /* row gap */
+    .el-element .uk-grid-margin {
+        margin-top: 14px !important;
+    }
