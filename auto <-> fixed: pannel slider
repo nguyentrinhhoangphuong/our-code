@@ -1,0 +1,11 @@
+từ auto sang fixed. chia 2 = 2 cột, chia 3 = 3 cột
+    .el-element .uk-slider-items > * {
+      width: calc(100% / 2) !important;
+      flex: 0 0 calc(100% / 2) !important;
+    }
+
+từ fixed sang auto
+.uk-slider-items > * {
+  width: auto;
+  flex: 0 0 auto;
+}
