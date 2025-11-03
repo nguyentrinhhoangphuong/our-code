@@ -1,4 +1,6 @@
-    /* Column gap */
+dành cho grid
+
+/* Column gap */
     .el-element .uk-grid-match[uk-grid] {
         margin-left: -14px !important;
     }
@@ -9,3 +11,15 @@
     .el-element .uk-grid-margin {
         margin-top: 14px !important;
     }
+
+
+
+dành cho panel slider
+/* Column gap */
+    .el-element .uk-slider-items {
+        margin-left: -14px !important;
+    }
+    .el-element .uk-slider-items > div {
+        padding-left: 14px !important;
+    }
+    /* row gap */
