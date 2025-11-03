@@ -23,3 +23,9 @@ dành cho panel slider
         padding-left: 14px !important;
     }
     /* row gap */
+
+
+tùy chỉnh dotnav của pannel slider
+.el-nav.uk-slider-nav.uk-dotnav > li:not(.uk-active) a {
+  background-color: #E4E4E4;
+}
