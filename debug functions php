@@ -1,0 +1,11 @@
+// lấy ds taxonomies
+add_action('wp_footer', 'show_all_taxonomies_in_footer');
+function show_all_taxonomies_in_footer() {
+    $taxonomies = get_taxonomies([], 'names');
+    echo '<div class="all-taxonomies" style="padding:20px; background:#f0f0f0;">';
+    echo '<h4>Danh sách Taxonomy:</h4><ul>';
+    foreach ($taxonomies as $taxonomy) {
+        echo '<li>' . esc_html($taxonomy) . '</li>';
+    }
+    echo '</ul></div>';
+}
