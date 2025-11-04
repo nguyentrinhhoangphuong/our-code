@@ -1,0 +1,112 @@
+document.addEventListener('DOMContentLoaded', () => {
+  const dropdownList = document.querySelector('.dropdown-list-type-hotel');
+  const btn = document.querySelector('.filter-dropdown .uk-button');
+  const keywordFilter = ['khách sạn', 'hotel', 'resort'];
+  const sliderItems = document.querySelector('.the-best-panel-slider .uk-slider-items');
+
+  if (!dropdownList || !btn || !sliderItems) return;
+
+  const originalSlide = sliderItems.querySelector('[class*="uk-width-1-2"]');
+  if (!originalSlide) return;
+
+  const templateSlide = originalSlide.cloneNode(true);
+
+  // ==================== LẤY TOÀN BỘ TỪ KHÓA ====================
+  async function fetchAllTags() {
+    let page = 1, all = [], keepFetching = true;
+    while (keepFetching) {
+      const res = await fetch(`/wp-json/wp/v2/tu-khoa?per_page=100&page=${page}`);
+      if (!res.ok) break;
+      const data = await res.json();
+      all = all.concat(data);
+      if (data.length < 100) keepFetching = false;
+      else page++;
+    }
+    return all;
+  }
+
+  fetchAllTags().then(allTags => {
+    const filtered = allTags.filter(t => {
+      const name = t.name.toLowerCase();
+      return keywordFilter.some(kw => name.includes(kw));
+    });
+
+    dropdownList.innerHTML = filtered.length
+      ? filtered.map(t => `<li><a href="#" data-term-id="${t.id}" data-slug="${t.slug}">${t.name}</a></li>`).join('')
+      : '<li><a>Không tìm thấy loại hình</a></li>';
+  });
+
+  // ==================== XỬ LÝ CHỌN LOẠI HÌNH ====================
+  dropdownList.addEventListener('click', e => {
+    if (!e.target.matches('a[data-term-id]')) return;
+    e.preventDefault();
+
+    const termId = e.target.dataset.termId;
+    const name = e.target.textContent.trim();
+
+    btn.innerHTML = `${name} <span uk-icon="icon: triangle-down; ratio: 0.8"></span>`;
+
+    dropdownList.querySelectorAll('a').forEach(a => a.classList.remove('active'));
+    e.target.classList.add('active');
+
+    fetch(`/wp-json/wp/v2/dia-diem?tu-khoa=${termId}&per_page=20&_embed`)
+      .then(res => res.json())
+      .then(items => {
+        sliderItems.innerHTML = '';
+
+        if (!items.length) {
+          sliderItems.innerHTML = '<div class="uk-text-center uk-padding">Không có bài viết nào</div>';
+          return;
+        }
+
+        items.forEach((item) => {
+          const slideClone = templateSlide.cloneNode(true);
+          const titleEl = slideClone.querySelector('.el-title');
+          const metaEl = slideClone.querySelector('.el-meta');
+          const linkEl = slideClone.querySelector('a.uk-link-toggle');
+          const imageEl = slideClone.querySelector('img.el-image');
+          const clipContainer = slideClone.querySelector('.uk-inline-clip');
+
+          if (titleEl) titleEl.innerHTML = item.title?.rendered || 'Không có tiêu đề';
+          if (metaEl) metaEl.textContent = item.custom_rate || 'Chưa có đánh giá';
+          if (linkEl) linkEl.href = item.link || '#';
+
+          // container chứa ảnh 
+          if (clipContainer) {
+            clipContainer.style.position = 'relative';
+            clipContainer.style.width = '100%';
+            clipContainer.style.paddingBottom = '133.33%'; /* Tỷ lệ 3:4 (376/282 = 1.333) */
+            clipContainer.style.overflow = 'hidden';
+          }
+
+          // cập nhật ảnh
+          if (imageEl && item._embedded?.['wp:featuredmedia']?.[0]) {
+            const featuredImage = item._embedded['wp:featuredmedia'][0].source_url;
+
+            // xóa <source>. show hình ảnh riêng biệt
+            const pictureEl = imageEl.closest('picture');
+            if (pictureEl) {
+              pictureEl.querySelectorAll('source').forEach(s => s.remove());
+            }
+
+            // responsive
+            imageEl.src = featuredImage;
+            imageEl.alt = item.title?.rendered || '';
+            imageEl.style.position = 'absolute';
+            imageEl.style.top = '0';
+            imageEl.style.left = '0';
+            imageEl.style.width = '100%';
+            imageEl.style.height = '100%';
+            imageEl.style.objectFit = 'cover';
+          }
+
+          sliderItems.appendChild(slideClone);
+        });
+
+      })
+      .catch(err => {
+        console.error('Lỗi fetch bài viết:', err);
+        sliderItems.innerHTML = '<div class="uk-text-center uk-padding uk-text-danger">Có lỗi xảy ra</div>';
+      });
+  });
+});
