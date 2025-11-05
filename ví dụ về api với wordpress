@@ -1,0 +1,208 @@
+document.addEventListener("DOMContentLoaded", () => {
+  function initDynamicFilter({
+    containerSelector,
+    dropdownSelector,
+    keywordFilter = [],
+    id,
+    sliderSelector
+  }) {
+    const container = document.querySelector(containerSelector);
+    if (!container) return;
+
+    const dropdownList = container.querySelector(dropdownSelector);
+    const btn = container.querySelector('.filter-dropdown .uk-button');
+    const sliderItems = container.querySelector(sliderSelector);
+
+    if (!dropdownList || !btn || !sliderItems) return;
+
+    const originalSlide = sliderItems.querySelector('[class*="uk-width-1-2"]');
+    if (!originalSlide) return;
+    const templateSlide = originalSlide.cloneNode(true);
+
+    let currentItems = [];
+    let currentSortType = null;
+
+    // ---------------------- RENDER ITEMS ----------------------
+    function renderItems(items) {
+      sliderItems.innerHTML = '';
+
+      if (!items.length) {
+        sliderItems.innerHTML = '<div class="uk-text-center uk-padding">Không có bài viết nào</div>';
+        return;
+      }
+
+      items.forEach((item) => {
+        const slideClone = templateSlide.cloneNode(true);
+        const titleEl = slideClone.querySelector('.el-title');
+        const metaEl = slideClone.querySelector('.el-meta');
+        const linkEl = slideClone.querySelector('a.uk-link-toggle');
+        const imageEl = slideClone.querySelector('img.el-image');
+        const clipContainer = slideClone.querySelector('.uk-inline-clip');
+        const contentEl = slideClone.querySelector('.el-content');
+
+        if (titleEl) {
+          const rawTitle = item.title?.rendered || 'Không có tiêu đề';
+          titleEl.innerHTML = extractPlaceName(rawTitle);
+        }
+
+        if (metaEl) metaEl.textContent = item.custom_rate || '3';
+        if (contentEl) contentEl.textContent = item.price || '';
+
+        if (linkEl) linkEl.href = item.link || '#';
+
+        if (clipContainer) {
+          clipContainer.style.position = 'relative';
+          clipContainer.style.width = '100%';
+          clipContainer.style.paddingBottom = '133.33%';
+          clipContainer.style.overflow = 'hidden';
+        }
+
+        if (imageEl && item._embedded?.['wp:featuredmedia']?.[0]) {
+          const featuredImage = item._embedded['wp:featuredmedia'][0].source_url;
+          const pictureEl = imageEl.closest('picture');
+          if (pictureEl) pictureEl.querySelectorAll('source').forEach(s => s.remove());
+          imageEl.src = featuredImage;
+          imageEl.alt = item.title?.rendered || '';
+          imageEl.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover';
+        }
+
+        sliderItems.appendChild(slideClone);
+      });
+
+      if (typeof UIkit !== 'undefined' && UIkit.slider) {
+        const sliderElement = container.querySelector('.the-best-panel-slider');
+        if (sliderElement) UIkit.slider(sliderElement).$emit('itemshow');
+      }
+    }
+
+    // ---------------------- LOAD MẶC ĐỊNH ----------------------
+    async function loadDefaultItems() {
+      sliderItems.innerHTML = '<div uk-spinner></div>';
+      try {
+        const res = await fetch(`/wp-json/wp/v2/dia-diem?${id}&per_page=20&_embed`);
+        const items = await res.json();
+        currentItems = items;
+        renderItems(items);
+      } catch (err) {
+        console.error('Lỗi load mặc định:', err);
+      }
+    }
+    loadDefaultItems();
+
+    // ---------------------- DROPDOWN KEYWORD ----------------------
+    async function fetchAllTags() {
+      let page = 1, all = [], keepFetching = true;
+      while (keepFetching) {
+        const res = await fetch(`/wp-json/wp/v2/tu-khoa?per_page=100&page=${page}`);
+        if (!res.ok) break;
+        const data = await res.json();
+        all = all.concat(data);
+        if (data.length < 100) keepFetching = false;
+        else page++;
+      }
+      return all;
+    }
+
+    fetchAllTags().then(allTags => {
+      const filtered = allTags.filter(t => {
+        const name = t.name.toLowerCase();
+        return keywordFilter.some(kw => name.includes(kw));
+      });
+
+      dropdownList.innerHTML = filtered.length
+        ? filtered.map(t => `<li><a href="#" data-term-id="${t.id}" data-slug="${t.slug}">${t.name}</a></li>`).join('')
+        : '<li><a>Không tìm thấy loại hình</a></li>';
+    });
+
+    dropdownList.addEventListener('click', e => {
+      if (!e.target.matches('a[data-term-id]')) return;
+      e.preventDefault();
+
+      const termId = e.target.dataset.termId;
+      const name = e.target.textContent.trim();
+
+      btn.innerHTML = `${name} <span uk-icon="icon: triangle-down; ratio: 0.8"></span>`;
+      dropdownList.querySelectorAll('a').forEach(a => a.classList.remove('active'));
+      e.target.classList.add('active');
+
+      sliderItems.innerHTML = '<div uk-spinner></div>';
+
+      fetch(`/wp-json/wp/v2/dia-diem?tu-khoa=${termId}&per_page=20&_embed`)
+        .then(res => res.json())
+        .then(items => {
+          currentItems = items;
+          const sortedItems = currentSortType ? sortItems(currentItems, currentSortType) : currentItems;
+          renderItems(sortedItems);
+        })
+        .catch(err => {
+          console.error('Lỗi fetch bài viết:', err);
+          sliderItems.innerHTML = '<div class="uk-text-center uk-padding uk-text-danger">Có lỗi xảy ra</div>';
+        });
+    });
+
+    // ---------------------- LỌC GIÁ ----------------------
+    container.querySelectorAll('a[data-sort^="gia-"]').forEach(link => {
+      link.addEventListener('click', e => {
+        e.preventDefault();
+        const sortType = e.target.dataset.sort;
+        currentSortType = sortType;
+
+        container.querySelectorAll('a[data-sort^="gia-"]').forEach(l => l.classList.remove('active'));
+        e.target.classList.add('active');
+
+        if (currentItems.length) renderItems(sortItems(currentItems, sortType));
+
+        const priceBtn = container.querySelector('[data-filter="gia"]');
+        if (priceBtn) {
+          const text = sortType === 'gia-tang' ? 'Giá tăng dần' : 'Giá giảm dần';
+          priceBtn.innerHTML = `${text} <span uk-icon="icon: triangle-down; ratio: 0.8"></span>`;
+        }
+      });
+    });
+
+    // ---------------------- LỌC ĐÁNH GIÁ ----------------------
+    container.querySelectorAll('a[data-sort$="-cao"], a[data-sort$="-thap"]').forEach(link => {
+      link.addEventListener('click', e => {
+        e.preventDefault();
+        const sortType = e.target.dataset.sort;
+        currentSortType = sortType;
+
+        container.querySelectorAll('a[data-sort$="-cao"], a[data-sort$="-thap"]').forEach(l => l.classList.remove('active'));
+        e.target.classList.add('active');
+
+        if (currentItems.length) renderItems(sortItems(currentItems, sortType));
+
+        const ratingBtn = container.querySelector('[data-filter="danh-gia"]');
+        if (ratingBtn) {
+          const text = sortType === 'cao-thap' ? 'Cao đến thấp' : 'Thấp đến cao';
+          ratingBtn.innerHTML = `${text} <span uk-icon="icon: triangle-down; ratio: 0.8"></span>`;
+        }
+      });
+    });
+  }
+
+  // ==================== KHỞI TẠO ====================
+  initDynamicFilter({
+    containerSelector: '.section-hotel',
+    dropdownSelector: '.dropdown-list-type-hotel',
+    keywordFilter: ['khách sạn', 'hotel', 'resort'],
+    id: 'danh-muc=242', // danh mục lưu trú
+    sliderSelector: '.the-best-panel-slider .uk-slider-items'
+  });
+
+  initDynamicFilter({
+    containerSelector: '.section-restaurant',
+    dropdownSelector: '.dropdown-list-type-restaurent',
+    keywordFilter: ['nhà hàng'],
+    id: 'tu-khoa=251', // từ khóa nhà hàng
+    sliderSelector: '.the-best-panel-slider .uk-slider-items'
+  });
+
+  initDynamicFilter({
+    containerSelector: '.section-cafe',
+    dropdownSelector: '.dropdown-list-type-cafe',
+    keywordFilter: ['coffee', 'cà phê', 'cafe', 'coffe'],
+    id: 'danh-muc=239', // danh mục cà phê
+    sliderSelector: '.the-best-panel-slider .uk-slider-items'
+  });
+});
