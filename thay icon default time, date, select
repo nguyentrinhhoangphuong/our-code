@@ -1,0 +1,78 @@
+/* thay đổi icon select form */
+.uk-select:not([multiple]):not([size]) {
+  background-image: url('/wp-content/uploads/2025/11/up_small_fill-1.svg') !important;
+}
+
+/* ẩn icon mặc định */
+input[type="time"]::-webkit-calendar-picker-indicator,
+input[type="date"]::-webkit-calendar-picker-indicator {
+  display: none;
+}
+input[type="time"] {
+  background-image: url("/wp-content/uploads/2025/11/Group-1.svg");
+  background-repeat: no-repeat;
+  background-position: right 10px center; 
+  background-size: 24px 24px;
+  padding-right: 18px;
+  cursor: pointer;
+}
+input[type="date"] {
+  background-image: url("/wp-content/uploads/2025/11/Group-2.svg");
+  background-repeat: no-repeat;
+  background-position: right 10px center; 
+  background-size: 24px 24px;
+  padding-right: 18px;
+  cursor: pointer;
+}
+
+/* Placeholder cho time và date */
+input[type="time"]::before,
+input[type="date"]::before {
+  content: attr(placeholder);
+  color: #999;
+  width: 100%;
+}
+
+/* Ẩn placeholder text ::before khi có giá trị */
+input[type="time"]:valid::before,
+input[type="date"]:valid::before {
+  display: none;
+}
+
+/* Ẩn các field mặc định */
+input[type="time"]::-webkit-datetime-edit-text,
+input[type="time"]::-webkit-datetime-edit-hour-field,
+input[type="time"]::-webkit-datetime-edit-minute-field,
+input[type="time"]::-webkit-datetime-edit-ampm-field {
+  display: none;
+}
+
+input[type="date"]::-webkit-datetime-edit-text,
+input[type="date"]::-webkit-datetime-edit-day-field,
+input[type="date"]::-webkit-datetime-edit-month-field,
+input[type="date"]::-webkit-datetime-edit-year-field {
+  display: none;
+}
+
+/* Hiển thị lại khi focus HOẶC có giá trị */
+input[type="time"]:focus::-webkit-datetime-edit-text,
+input[type="time"]:focus::-webkit-datetime-edit-hour-field,
+input[type="time"]:focus::-webkit-datetime-edit-minute-field,
+input[type="time"]:focus::-webkit-datetime-edit-ampm-field,
+input[type="time"]:valid::-webkit-datetime-edit-text,
+input[type="time"]:valid::-webkit-datetime-edit-hour-field,
+input[type="time"]:valid::-webkit-datetime-edit-minute-field,
+input[type="time"]:valid::-webkit-datetime-edit-ampm-field {
+  display: inline;
+}
+
+input[type="date"]:focus::-webkit-datetime-edit-text,
+input[type="date"]:focus::-webkit-datetime-edit-day-field,
+input[type="date"]:focus::-webkit-datetime-edit-month-field,
+input[type="date"]:focus::-webkit-datetime-edit-year-field,
+input[type="date"]:valid::-webkit-datetime-edit-text,
+input[type="date"]:valid::-webkit-datetime-edit-day-field,
+input[type="date"]:valid::-webkit-datetime-edit-month-field,
+input[type="date"]:valid::-webkit-datetime-edit-year-field {
+  display: inline;
+}
