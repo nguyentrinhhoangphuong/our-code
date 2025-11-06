@@ -12,7 +12,14 @@ dành cho grid
         margin-top: 14px !important;
     }
 
+cũng có thể là như dưới khi custom form không dùng builder 
+.el-element .uk-grid {
+  margin-left: -20px !important;
+}
 
+.el-element .uk-grid > * {
+  padding-left: 20px !important;
+}
 
 dành cho panel slider
 /* Column gap */
