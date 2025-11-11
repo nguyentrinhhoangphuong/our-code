@@ -1,0 +1,45 @@
+document.addEventListener('DOMContentLoaded', function() {
+    // Tìm slidenav ở cột phải
+    const slidenavContainer = document.querySelector('.kham-pha-dia-diem-theo-khu-vuc .cl-right .uk-slidenav-container');
+    
+    // Tìm cột trái (nơi sẽ đặt clone)
+    const leftColumn = document.querySelector('.kham-pha-dia-diem-theo-khu-vuc .cl-left-clone-slide-nav');
+    
+    if (slidenavContainer && leftColumn) {
+        // Clone slidenav
+        const clonedNav = slidenavContainer.cloneNode(true);
+        
+        // Thêm class để dễ styling
+        clonedNav.classList.add('cloned-slidenav');
+        
+        // Xóa class định vị cũ
+        clonedNav.classList.remove('uk-position-bottom-left', 'uk-position-small');
+        
+        // Thêm vào cột trái
+        leftColumn.querySelector('.uk-position-relative').appendChild(clonedNav);
+        
+        // Ẩn slidenav gốc
+        slidenavContainer.style.display = 'none';
+        
+        // Cập nhật chức năng của nút clone để điều khiển slider bên phải
+        const clonedPrev = clonedNav.querySelector('.uk-slidenav-previous');
+        const clonedNext = clonedNav.querySelector('.uk-slidenav-next');
+        
+        const originalPrev = slidenavContainer.querySelector('.uk-slidenav-previous');
+        const originalNext = slidenavContainer.querySelector('.uk-slidenav-next');
+        
+        if (clonedPrev && originalPrev) {
+            clonedPrev.addEventListener('click', function(e) {
+                e.preventDefault();
+                originalPrev.click();
+            });
+        }
+        
+        if (clonedNext && originalNext) {
+            clonedNext.addEventListener('click', function(e) {
+                e.preventDefault();
+                originalNext.click();
+            });
+        }
+    }
+});
