@@ -33,3 +33,20 @@
   z-index: 1;
   transition: background-color 0.3s ease;
 }
+
+// =======================
+/* Cách 2: Dùng trực tiếp trên el-item */
+.el-item::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, #FFFFFF 0%, rgba(255, 255, 255, 0) 155.42%);
+    border-radius: 8px;
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* Đảm bảo content nằm trên gradient */
+.el-item .uk-position-cover {
+    z-index: 2;
+}
