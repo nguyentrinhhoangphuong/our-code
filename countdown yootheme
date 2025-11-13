@@ -1,0 +1,72 @@
+document.addEventListener('DOMContentLoaded', function () {
+    const countdown = document.querySelector('.countdown');
+    if (!countdown) return;
+
+    const firstChild = countdown.firstElementChild;
+    const firstSeparator = firstChild ? firstChild.nextElementSibling : null;
+
+    if (firstChild) {
+        firstChild.remove();
+    }
+    if (firstSeparator && firstSeparator.classList.contains('uk-countdown-separator')) {
+        firstSeparator.remove();
+    }
+
+    // Thêm class countdown-item cho các phần tử còn lại
+    const children = countdown.children;
+    for (let i = 0; i < children.length; i++) {
+        const child = children[i];
+        if (!child.classList.contains('uk-countdown-separator')) {
+            child.classList.add('countdown-item');
+        }
+    }
+});
+
+
+.el-element .countdown {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+}
+
+.el-element .countdown-item {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 4px !important;
+    background: #ffffff !important;
+    padding: 2px 12px !important;
+    border-radius: 4px !important;
+}
+
+.el-element .uk-countdown-number {
+    font-weight: 500;
+    font-size: 18px;
+    line-height: 150%;
+    color: #CC2028;
+    margin: 0 !important;
+}
+
+.el-element .uk-countdown-label {
+    font-weight: 400;
+    font-size: 10px;
+    line-height: 150%;
+    margin: 0 !important;
+    white-space: nowrap;
+}
+
+.el-element .uk-margin-small {
+    margin-top: 0 !important;
+}
+
+.el-element .uk-countdown-separator {
+    color: #ffffff;
+    font-size: 24px !important;
+    font-weight: bold !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    margin: 0 6px !important;
+    line-height: 1 !important;
+    padding: 0 !important;
+}
