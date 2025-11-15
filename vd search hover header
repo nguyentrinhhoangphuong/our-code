@@ -1,0 +1,99 @@
+  //================== hover icon search. header ========================
+  document.addEventListener('DOMContentLoaded', function () {
+    const searchIcon = document.querySelector('#builderwidget-2\\#0 .uk-first-column .el-item');
+    if (!searchIcon) return;
+    searchIcon.style.position = 'relative';
+    const searchFormHTML = `
+        <div class="cloned-search-wrapper">
+            <form action="https://www.new.khamphadanang.vn/" method="get" role="search" class="uk-search uk-search-default cloned-search-form">
+                <span class="uk-search-icon" uk-search-icon></span>
+                <input name="s" type="search" placeholder="VD: Tìm khách sạn Đà Nẵng" class="uk-search-input cloned-search-input" required="" aria-label="Search">
+            </form>
+        </div>
+    `;
+    searchIcon.insertAdjacentHTML('beforeend', searchFormHTML);
+    const searchWrapper = searchIcon.querySelector('.cloned-search-wrapper');
+    searchIcon.addEventListener('mouseenter', function () {
+      searchWrapper.classList.add('active');
+    });
+    searchIcon.addEventListener('mouseleave', function () {
+      const input = searchWrapper.querySelector('input');
+      if (document.activeElement !== input) {
+        searchWrapper.classList.remove('active');
+      }
+    });
+    searchIcon.addEventListener('focusout', function () {
+      setTimeout(() => {
+        searchWrapper.classList.remove('active');
+      }, 200);
+    });
+  });
+
+
+
+/* ===================== search ==========================  */
+.cloned-search-wrapper {
+    position: absolute;
+    right: 0; /* hiện bên trái icon */
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 100;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    /* opacity: 1 !important; */
+    pointer-events: auto !important;
+}
+
+.cloned-search-wrapper.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.cloned-search-form {
+    width: 316px;
+    height: 36px;
+    position: relative;
+}
+
+.cloned-search-input {
+    width: 100% !important;
+    height: 36px !important;
+    padding: 6px 4px 6px 30px !important;
+    border: 3px solid #E4E4E480 !important;
+    border-radius: 100px !important;3
+    background: white !important;
+    font-size: 14px !important;
+    color: #666 !important;
+    box-shadow: none !important;
+    outline: none !important;
+    transition: all 0.3s ease !important;
+}
+
+.cloned-search-input:focus {
+    border-color: #E84E1B !important;
+    box-shadow: 0 0 0 1px rgba(232, 78, 27, 0.1) !important;
+}
+
+.cloned-search-input::placeholder {
+    color: #999 !important;
+    font-size: 14px !important;
+}
+
+
+.cloned-search-form .uk-search-icon-flip,
+.cloned-search-form .uk-search-icon {
+    position: absolute !important;
+    left: 0px !important;
+    right: auto !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    color: #E84E1B !important;
+    width: 18px !important;
+    height: 18px !important;
+}
+
+.cloned-search-form .uk-search-icon svg {
+    width: 18px !important;
+    height: 18px !important;
+}
