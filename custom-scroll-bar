@@ -1,0 +1,33 @@
+.el-element {
+    max-height: 566px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-right: 20px;
+    scroll-behavior: smooth;
+}
+
+/* Scrollbar - width phải đủ rộng cho thumb */
+.el-element::-webkit-scrollbar {
+    width: 10px; /* rộng hơn để chứa thumb */
+}
+
+/* Track (thanh xanh nhạt) - NHỎ HƠN width của scrollbar */
+.el-element::-webkit-scrollbar-track {
+    background: #FFFFFF7A;
+    border-radius: 4px;
+    border-left: 3px solid transparent;
+    border-right: 3px solid transparent;
+    background-clip: padding-box;
+}
+
+/* Thumb (nút trắng) - RỘNG BẰNG width của scrollbar */
+.el-element::-webkit-scrollbar-thumb {
+    background-color: #ffffff;
+    border-radius: 8px;
+    border: none;
+}
+
+/* Hover effect */
+.el-element::-webkit-scrollbar-thumb:hover {
+    background-color: #f5f5f5;
+}
