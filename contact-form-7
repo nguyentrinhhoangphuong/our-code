@@ -139,3 +139,90 @@
     [submit class:submit-btn "Gửi thông tin"]
   </div>
 </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* ========= dành cho custom form wc7 thay đổi placeholder ========*/
+
+/* Placeholder cho time và date */
+input[type="time"]::before,
+input[type="date"]::before {
+  content: attr(placeholder);
+  font-weight: 400;
+  font-size: 18px;
+  color: #666666;
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+/* Ẩn placeholder text ::before khi có giá trị */
+input[type="time"]:valid::before,
+input[type="date"]:valid::before {
+  display: none;
+}
+
+/* Ẩn các field mặc định */
+input[type="time"]::-webkit-datetime-edit-text,
+input[type="time"]::-webkit-datetime-edit-hour-field,
+input[type="time"]::-webkit-datetime-edit-minute-field,
+input[type="time"]::-webkit-datetime-edit-ampm-field {
+  display: none;
+}
+
+input[type="date"]::-webkit-datetime-edit-text,
+input[type="date"]::-webkit-datetime-edit-day-field,
+input[type="date"]::-webkit-datetime-edit-month-field,
+input[type="date"]::-webkit-datetime-edit-year-field {
+  display: none;
+}
+
+/* Hiển thị lại khi focus HOẶC có giá trị */
+input[type="time"]:focus::-webkit-datetime-edit-text,
+input[type="time"]:focus::-webkit-datetime-edit-hour-field,
+input[type="time"]:focus::-webkit-datetime-edit-minute-field,
+input[type="time"]:focus::-webkit-datetime-edit-ampm-field,
+input[type="time"]:valid::-webkit-datetime-edit-text,
+input[type="time"]:valid::-webkit-datetime-edit-hour-field,
+input[type="time"]:valid::-webkit-datetime-edit-minute-field,
+input[type="time"]:valid::-webkit-datetime-edit-ampm-field {
+  display: inline;
+}
+
+input[type="date"]:focus::-webkit-datetime-edit-text,
+input[type="date"]:focus::-webkit-datetime-edit-day-field,
+input[type="date"]:focus::-webkit-datetime-edit-month-field,
+input[type="date"]:focus::-webkit-datetime-edit-year-field,
+input[type="date"]:valid::-webkit-datetime-edit-text,
+input[type="date"]:valid::-webkit-datetime-edit-day-field,
+input[type="date"]:valid::-webkit-datetime-edit-month-field,
+input[type="date"]:valid::-webkit-datetime-edit-year-field {
+  display: inline;
+}
