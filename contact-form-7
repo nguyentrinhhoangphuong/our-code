@@ -161,7 +161,10 @@
 
 
 
-
+add_filter('wpcf7_autop_or_not', '__return_false');
+add_filter('wpcf7_form_elements', function($content) {
+    return preg_replace(['/<br\s*\/?>/', '/<p[^>]*>(\\s*)<\/p>/', '/<p[^>]*>(.*?)<\/p>/'], ['', '', '$1'], $content);
+});
 
 
 
