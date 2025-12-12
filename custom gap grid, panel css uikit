@@ -23,6 +23,18 @@ dành cho grid
 }
 
 
+/* gap các cột nhung bỏ các cột đầu cuối*/
+.uk-grid.uk-grid-column-medium {
+    margin-left: 0 !important;
+}
+.uk-grid.uk-grid-column-medium > * {
+    padding-left: 0 !important;
+}
+
+.uk-grid.uk-grid-column-medium > *:nth-child(2) {
+    padding-left: 34px !important;
+}
+
 cũng có thể là như dưới khi custom form không dùng builder 
 .el-element .uk-grid {
   margin-left: -20px !important;
