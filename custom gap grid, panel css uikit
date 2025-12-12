@@ -12,6 +12,17 @@ dành cho grid
         margin-top: 14px !important;
     }
 
+
+/* dành cho gap và divider */
+.el-element .uk-grid-margin {
+    margin-top: 48px !important; // 32px
+}
+
+.el-element .uk-grid-divider.uk-grid-stack>.uk-grid-margin::before {
+    top: -24px !important;   // -16px
+}
+
+
 cũng có thể là như dưới khi custom form không dùng builder 
 .el-element .uk-grid {
   margin-left: -20px !important;
