@@ -49,18 +49,109 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 
+// ==================================================
+https://nthp.xyz/wp/wp-content/uploads/2025/12/screenshot-2025-12-17_09-26-30.png
+
+.uk-slider-items {
+  height: 600px;
+}
+.uk-slider-items .is-center{
+    width:30% !important;
+}
+.uk-slider-items .is-near{
+    width:20% !important;
+}
+.uk-slider-items .is-far{
+    width:15% !important;
+}
+.uk-slider-items > div {
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.uk-slider-items .el-item {
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.uk-slider-items .el-image {
+  object-fit: cover;
+  transition: height 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.uk-slider-items > div.is-center {
+  transform: translateY(40px);
+}
+.uk-slider-items > div.is-center .el-image {
+  height: 545px !important;
+
+}
+
+.uk-slider-items > div.is-near {
+  transform: translateY(60px); 
+}
+.uk-slider-items > div.is-near .el-image {
+  height: 492px !important;
+
+}
+
+.uk-slider-items > div.is-far {
+  transform: translateY(80px); 
+}
+.uk-slider-items > div.is-far .el-image {
+  height: 424px !important;
+
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const slider = document.querySelector('.custom-slider');
+  if (!slider) return;
+
+  const items = slider.querySelectorAll('.uk-slider-items > div');
+
+  function update() {
+    const sliderRect = slider.getBoundingClientRect();
+    const centerX = sliderRect.left + sliderRect.width / 2;
+
+    const itemsWithDistance = [];
+
+    items.forEach(item => {
+      const rect = item.getBoundingClientRect();
+      const itemCenter = rect.left + rect.width / 2;
+      const distance = Math.abs(centerX - itemCenter);
+
+      itemsWithDistance.push({
+        element: item,
+        distance: distance
+      });
+    });
+
+    itemsWithDistance.sort((a, b) => a.distance - b.distance);
+
+    itemsWithDistance.forEach((item, index) => {
+      const element = item.element;
+      element.classList.remove('is-center', 'is-near', 'is-far');
+
+      if (index === 0) {
+        element.classList.add('is-center');
+      } else if (index === 1 || index === 2) {
+        element.classList.add('is-near');
+      } else {
+        element.classList.add('is-far');
+      }
+    });
+  }
+
+  update();
+
+  UIkit.util.on(slider, 'itemshow', update);
+  UIkit.util.on(slider, 'itemshown', update);
+  window.addEventListener('resize', update);
+});
 
 
 
 
 
-
-
-
-
-
-
-
+// ====================================================
 
 
 
