@@ -1,0 +1,850 @@
+<?php
+function hotel_search_form_shortcode() {
+    $today = date('Y-m-d');               
+    $checkin = $today;                       
+    $checkout = date('Y-m-d', strtotime('+1 day'));
+
+    $location_terms = get_terms(array(
+        'taxonomy' => 'location',
+        'hide_empty' => false, // Lấy cả terms chưa có bài viết
+        'orderby' => 'name',
+        'order' => 'ASC'
+    ));
+
+    $selected_location = isset($_GET['location']) ? sanitize_text_field($_GET['location']) : '';
+    $selected_location_term = $selected_location ? get_term_by('slug', $selected_location, 'location') : false;
+    $selected_location_text = $selected_location_term ? $selected_location_term->name : 'Select';
+
+    ob_start();
+    ?>
+    
+    <div class="hotel-search-form-wrapper uk-container uk-container-large">
+        <form class="hotel-search-form uk-card uk-card-default uk-card-body uk-border-rounded" method="GET" action="">
+
+            <!-- Hàng 1 -->    
+            <div class="uk-grid-large uk-flex-middle row-1"uk-grid>
+                <!-- search -->
+                <div class="uk-width-1-3@m">
+                    <div class="uk-inline uk-width-1-1">
+                        <span class="uk-form-icon" uk-icon="icon: search"></span>
+                        <input class="uk-input search-input" type="text" name="search" placeholder="Search">
+                    </div>
+                </div>
+
+                
+                <!-- Time: Check-in & Check-out -->
+                <div class="uk-width-expand@m">
+                    <div class="uk-grid-small uk-flex-middle time-row" uk-grid>
+                        <div class="uk-width-auto">
+                            <label class="uk-text-normal">Time:</label>
+                        </div>
+                        <div class="uk-width-expand">
+                            <div class="date-range-container">
+                                <div class="date-field">
+                                    <span class="calendar-icon" uk-icon="icon: calendar"></span>
+                                    <input type="date" id="checkin" name="checkin" value="<?php echo esc_attr($checkin); ?>" min="<?php echo esc_attr($today); ?>" class="custom-date-input">
+                                </div>
+                                <span class="date-separator">—</span>
+                                <div class="date-field">
+                                    <span class="calendar-icon" uk-icon="icon: calendar"></span>
+                                    <input type="date" id="checkout" name="checkout" value="<?php echo esc_attr($checkout); ?>" min="<?php echo esc_attr($checkin); ?>" class="custom-date-input">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                
+                <!-- Clear Selection Button -->
+                <div class="uk-width-auto@m clear-wrapper">
+                    <button class="uk-button uk-button-primary uk-button-small clear" type="reset">Clear selection</button>
+                </div>
+            </div>
+
+            <!-- Hàng 2 -->
+            <div class="uk-grid-default uk-child-width-1-5@m" uk-grid>
+                
+                <!-- Passenger -->
+                <div>
+                    <label class="uk-form-label uk-text-normal">Passenger</label>
+                    <div class="uk-inline uk-width-1-1">
+                        <button class="uk-button uk-button-primary uk-button-small uk-width-1-1" type="button" aria-haspopup="true">
+                            <span uk-icon="users" style="margin-right: 8px;"></span>
+                            <span class="passenger-text text">2 adults, 1 child</span>
+                        </button>
+
+                        <div uk-dropdown="mode: click" class="uk-dropdown passenger-dropdown">
+                            <!-- Adult -->
+                            <div class="passenger-item">
+                                <div class="passenger-info">
+                                    <div class="passenger-label">Adult</div>
+                                    <div class="passenger-age">> 10 years old</div>
+                                </div>
+                                <div class="passenger-counter">
+                                    <button type="button" class="counter-btn minus-btn" data-type="adult">
+                                        <span uk-icon="minus"></span>
+                                    </button>
+                                    <span class="counter-value" id="adult-count">2</span>
+                                    <button type="button" class="counter-btn plus-btn" data-type="adult">
+                                        <span uk-icon="plus"></span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <hr class="uk-margin-small">
+
+                            <!-- Children -->
+                            <div class="passenger-item">
+                                <div class="passenger-info">
+                                    <div class="passenger-label">Children</div>
+                                    <div class="passenger-age">2 - 10 years old</div>
+                                </div>
+                                <div class="passenger-counter">
+                                    <button type="button" class="counter-btn minus-btn" data-type="children">
+                                        <span uk-icon="minus"></span>
+                                    </button>
+                                    <span class="counter-value" id="children-count">1</span>
+                                    <button type="button" class="counter-btn plus-btn" data-type="children">
+                                        <span uk-icon="plus"></span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <hr class="uk-margin-small">
+
+                            <!-- Baby -->
+                            <div class="passenger-item">
+                                <div class="passenger-info">
+                                    <div class="passenger-label">Baby</div>
+                                    <div class="passenger-age">< 2 years old</div>
+                                </div>
+                                <div class="passenger-counter">
+                                    <button type="button" class="counter-btn minus-btn" data-type="baby">
+                                        <span uk-icon="minus"></span>
+                                    </button>
+                                    <span class="counter-value" id="baby-count">0</span>
+                                    <button type="button" class="counter-btn plus-btn" data-type="baby">
+                                        <span uk-icon="plus"></span>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                        </div>
+                        <input type="hidden" name="adults" value="2">
+                        <input type="hidden" name="children" value="1">
+                        <input type="hidden" name="babies" value="0">
+                    </div>
+                </div>
+                
+                <!-- Location -->
+                <div>
+                    <label class="uk-form-label uk-text-normal">Location</label>
+                    <div class="uk-inline uk-width-1-1">
+                        <button class="uk-button uk-button-primary uk-button-small uk-width-1-1 location-btn" type="button" aria-haspopup="true">
+                            <span class="selected-location text">Select</span>
+                            <span uk-icon="triangle-down"></span>
+                        </button>
+                        <div uk-dropdown="mode: click" class="uk-dropdown">
+                            <ul class="uk-nav uk-dropdown-nav">
+                                <li><a href="#" data-value="" class="location-item">Select</a></li>
+                                <li><a href="#" data-value="hanoi" class="location-item">Ha Noi</a></li>
+                                <li><a href="#" data-value="hochiminh" class="location-item">Ho Chi Minh</a></li>
+                                <li><a href="#" data-value="nhatrang" class="location-item">Nha Trang</a></li>
+                                <li><a href="#" data-value="danang" class="location-item">Da Nang</a></li>
+                                <li><a href="#" data-value="vungtau" class="location-item">Vung Tau</a></li>
+                            </ul>
+                        </div>
+                        <input type="hidden" name="location" value="">
+                    </div>
+                </div>
+                
+                <!-- Hotel type -->
+                <div>
+                    <label class="uk-form-label uk-text-normal">Hotel type</label>
+                    <div class="uk-inline uk-width-1-1">
+                        <button class="uk-button uk-button-primary uk-button-small uk-width-1-1 hotel-type-btn" type="button" aria-haspopup="true">
+                            <span class="selected-hotel-type text">Room Hotel</span>
+                            <span uk-icon="triangle-down"></span>
+                        </button>
+                        <div uk-dropdown="mode: click" class="uk-dropdown">
+                            <ul class="uk-nav uk-dropdown-nav">
+                                <li><a href="#" data-value="" class="hotel-type-item">Room Hotel</a></li>
+                                <li><a href="#" data-value="homestay" class="hotel-type-item">Home Stay</a></li>
+                                <li><a href="#" data-value="single" class="hotel-type-item">Single room</a></li>
+                                <li><a href="#" data-value="double" class="hotel-type-item">Double room</a></li>
+                            </ul>
+                        </div>
+                        <input type="hidden" name="hotel_type" value="">
+                    </div>
+                </div>
+                
+                <!-- Price -->
+                <div>
+                    <label class="uk-form-label uk-text-normal">Price</label>
+                    <div class="uk-inline uk-width-1-1">
+                        <button class="uk-button uk-button-primary uk-button-small uk-width-1-1 price-btn" type="button" aria-haspopup="true">
+                            <span class="selected-price text">From 400,000 VND</span>
+                            <span uk-icon="triangle-down"></span>
+                        </button>
+                        <div uk-dropdown="mode: click" class="uk-dropdown">
+                            <ul class="uk-nav uk-dropdown-nav">
+                                <li><a href="#" data-value="" class="price-item">From 400,000 VND</a></li>
+                                <li><a href="#" data-value="under_500k" class="price-item">Under 500,000 VND</a></li>
+                                <li><a href="#" data-value="500k_2m" class="price-item">From 500,000 - 2,000,000 VND</a></li>
+                                <li><a href="#" data-value="over_2m" class="price-item">Over 2,000,000 VND</a></li>
+                            </ul>
+                        </div>
+                        <input type="hidden" name="price" value="">
+                    </div>
+                </div>
+                
+                <!-- Sort by -->
+                <div>
+                    <label class="uk-form-label uk-text-normal">Sort by</label>
+                    <div class="uk-inline uk-width-1-1">
+                        <button class="uk-button uk-button-primary uk-button-small uk-width-1-1 sortby-btn" type="button" aria-haspopup="true">
+                            <span class="selected-sortby text">New</span>
+                            <span uk-icon="triangle-down"></span>
+                        </button>
+                        <div uk-dropdown="mode: click" class="uk-dropdown">
+                            <ul class="uk-nav uk-dropdown-nav">
+                                <li><a href="#" data-value="new" class="sortby-item">New</a></li>
+                                <li><a href="#" data-value="hot" class="sortby-item">Hot</a></li>
+                                <li><a href="#" data-value="lowest_price" class="sortby-item">Lowest price</a></li>
+                                <li><a href="#" data-value="highest_price" class="sortby-item">Highest price</a></li>
+                                <li><a href="#" data-value="all" class="sortby-item">All</a></li>
+                            </ul>
+                        </div>
+                        <input type="hidden" name="sort_by" value="new">
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Hàng 3 -->
+            <div class="uk-flex uk-hidden@m" style="margin-top: 24px; gap: 28px;">
+                <button class="uk-button uk-button-primary uk-button-small clear" type="reset">
+                    Clear selection
+                </button>
+                <button class="uk-button uk-button-default uk-button-small search uk-flex-1" type="submit">
+                    Search
+                </button>
+            </div>
+
+
+        </form>
+    </div>
+
+    <style>
+        .hotel-search-form {
+            padding: 36px 24px; 
+        }
+        .hotel-search-form .uk-form-icon {
+            color: #E86A33;
+            background: #FDF1EB;
+            border-radius: 100px;
+            width: 36px;
+            height: 36px;
+            margin: 4px;
+        }
+
+        .hotel-search-form .uk-form-icon:not(.uk-form-icon-flip)~.uk-input {
+            padding-left: 48px !important;
+        }
+
+        .hotel-search-form .search-input {
+            border: 1px solid #E4E4E4;
+            border-radius: 100px !important; 
+            height: 44px;
+            font-size: 18px;
+            font-weight: 500;
+            color: #212121;
+            transition: all 0.3s ease;
+        }
+
+        .hotel-search-form .search-input:focus {
+            border-color: #E86A33 !important;
+            outline: none;
+        }
+
+
+        /* === Time === */
+        .date-range-container {
+            display: inline-flex;
+            align-items: center;
+            border: 1px solid #E4E4E4;
+            border-radius: 100px;
+            padding: 8px 16px;
+            background: #fff;
+            height: 44px;
+            box-sizing: border-box;
+            min-width: fit-content;
+        }
+
+        .date-range-container:hover {
+            border: 1px solid #E86A33;
+        }
+
+        .date-range-container:hover .calendar-icon {
+            color: #E86A33;
+        }
+
+        .date-field {
+            display: flex;
+            align-items: center;
+            position: relative;
+        }
+
+        .calendar-icon {
+            color: #666666;
+            margin-right: 8px;
+            display: flex;
+            align-items: center;
+            width: 24px;
+            height: 24px;
+        }
+
+        .date-separator {
+            margin: 0 10px;
+            color: #666666;
+            font-weight: 500;
+        }
+
+        .custom-date-input {
+            border: none !important;
+            background: transparent !important;
+            padding: 0 !important;
+            font-family: inherit;
+            font-size: clamp(14px, calc(13.20px + 0.2500vw), 18px);
+            font-weight: 400;
+            color: #666666;
+            width: 102px;
+            outline: none;
+            cursor: pointer;
+        }
+
+        /* Ẩn icon mặc định browser */
+        .custom-date-input::-webkit-calendar-picker-indicator {
+            background: transparent;
+            bottom: 0;
+            color: transparent;
+            cursor: pointer;
+            height: auto;
+            left: 0;
+            position: absolute;
+            right: 0;
+            top: 0;
+            width: auto;
+        }
+        /* end time */
+
+
+
+
+        .hotel-search-form .uk-button.uk-button-primary.uk-button-small {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: left;
+            padding: 0 15px;
+        }
+
+        .hotel-search-form .passenger-text,
+        .hotel-search-form .selected-location,
+        .hotel-search-form .selected-hotel-type,
+        .hotel-search-form .selected-price,
+        .hotel-search-form .selected-sortby {
+            flex-grow: 1;
+            text-align: left;
+        }
+
+        .hotel-search-form [uk-icon="users"],
+        .hotel-search-form [uk-icon="triangle-down"] {
+            flex-shrink: 0;
+        }
+
+        .hotel-search-form .uk-button.uk-button-primary.uk-button-small [uk-icon="triangle-down"] {
+            margin-left: 10px;
+        }
+
+        .hotel-search-form span.text {
+            font-weight: 500;
+            font-size: clamp(14px, calc(13.20px + 0.2500vw), 18px);
+            line-height: 150%;
+            padding: 8px 0 8px 4px;
+            display: inline-block;
+            max-width: 100%;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+
+
+        /*========== clear selection ==========*/
+        .hotel-search-form .clear {
+            position: relative;                    
+            background: #FDF1EB;                   
+            border: 1px solid #FFFFFF !important;
+            font-weight: 600;
+            font-size: clamp(13px, calc(12.31px + 0.1923vw), 16px);
+            line-height: 150%;
+            color: #212121;
+            padding: 10px 24px !important;
+            overflow: hidden;                      
+            transition: color 0.3s ease-in-out;    
+            z-index: 1;                           
+            cursor: pointer;
+        }
+
+        .hotel-search-form .search {
+            font-weight: 600;
+            font-size: 16px;
+            line-height: 150%;
+            padding: 10px 24px !important;     
+        }
+
+        .hotel-search-form .clear::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                90deg,
+                #C33E03 0%,
+                #E86A33 93.23%,
+                rgba(255, 165, 0, 0.965) 302.36%
+            );
+            opacity: 0;                                      
+            transition: opacity 0.3s ease-in-out;            
+            z-index: -1;                                     
+            pointer-events: none;                           
+        }
+
+        .hotel-search-form .clear:hover {
+            color: #ffffff;                              
+        }
+        /* Hiện gradient khi hover */
+        .hotel-search-form .clear:hover::before {
+            opacity: 1;                                     
+        }
+        /*========== end clear selection ==========*/
+
+        .hotel-search-form .row-1 {
+            margin-bottom: 28px;
+        }
+
+        .hotel-search-form .uk-text-normal{
+            font-weight: 500;
+            font-size: clamp(16px, calc(15.60px + 0.1250vw), 18px);
+            line-height: 150%;
+            color: #212121;
+        }
+
+        .uk-form-label {
+            display: block;
+            margin-bottom: 12px;
+            font-size: 14px;
+        }
+        .uk-dropdown {
+            min-width: 200px;
+            width: 100%;
+            padding: 12px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px 0px #1A1A1A14;
+        }
+        .uk-dropdown-nav > li > a {
+            font-family: Mulish;
+            padding: 8px 10px;
+            color: #212121;
+            font-weight: 600;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            line-height: 150%;
+        }
+
+        .uk-dropdown-nav > li > a:hover {
+            background: #FDF1EB;
+            color: #E86A33;
+            border-radius: 100px;
+        }
+        
+        .passenger-dropdown {
+            min-width: 250px;
+            padding: 10px;
+            border-radius: 10px;
+        }
+
+        .passenger-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .passenger-info {
+            flex: 1;
+        }
+        .passenger-label {
+            font-weight: bold;
+            font-size: 15px;
+            margin-bottom: 0px;
+            color: #212121;
+        }
+        .passenger-age {
+            font-size: 12px;
+            color: #666666;
+        }
+        .passenger-counter {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .counter-btn {
+            width: 24px;
+            height: 24px;
+            border: 2px solid #E4E4E4;
+            background: #fff;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        .counter-btn:hover {
+            border-color: #E86A33;
+            background: #E86A33;
+            color: #fff;
+        }
+        .counter-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+        .counter-btn:disabled:hover {
+            border-color: #e5e5e5;
+            background: #fff;
+            color: inherit;
+        }
+        .counter-value {
+            font-weight: bold;
+            font-size: 16px;
+            min-width: 20px;
+            text-align: center;
+        }
+
+        .time-row div:nth-child(2) {
+            margin-left: 16px;
+        }
+
+        .active-drop {
+            color: #E86A33 !important;
+        }
+
+        @media (max-width: 960px) {
+            .hotel-search-form {
+                padding: 16px;
+            }
+
+            .hotel-search-form-wrapper .uk-card {
+                border: none;
+            }
+
+            .hotel-search-form-wrapper .uk-card-body {
+                padding: 0;
+            }
+            .hotel-search-form .row-1 {
+                margin-bottom: 16px;
+            }
+            
+            .uk-grid-large>.uk-grid-margin:has(.time-row) {
+                margin-top: 24px; 
+            }
+
+            .clear-wrapper {
+                display: none;
+            }
+
+            .uk-form-label {
+                margin-bottom: 8px;
+            }
+
+            .date-range-container {
+                padding: 9px 12px;
+            }
+            
+            .date-separator {
+                margin: 0 8px 0 0;
+                font-size: 8px;
+            }
+
+            .time-row {
+                justify-content: flex-start;
+            }
+
+            .time-row div:nth-child(2) {
+                display: flex;
+                justify-content: end;
+            }
+
+            .custom-date-input {
+                width: 87px;
+            }
+
+            .calendar-icon {
+                width: 14px;
+                height: 14px;
+                margin-right: 6px;
+                color: #C4C4C4;
+            }
+
+            .hotel-search-form .clear {
+                padding: 12px 24px !important;
+            }
+        }
+
+       @media (max-width: 360px) {
+            .date-range-container {
+                padding: 8px 12px;
+            }
+       }
+
+        
+    </style>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            let adultCount = 2;
+            let childrenCount = 1;
+            let babyCount = 0;
+            
+            function updatePassengerText() {
+                var parts = [];
+                
+                if (adultCount > 0) {
+                    parts.push(adultCount + ' adult' + (adultCount > 1 ? 's' : ''));
+                }
+                if (childrenCount > 0) {
+                    parts.push(childrenCount + ' child' + (childrenCount > 1 ? 'ren' : ''));
+                }
+                if (babyCount > 0) {
+                    parts.push(babyCount + ' baby' + (babyCount > 1 ? 'ies' : ''));
+                }
+                
+                if (parts.length === 0) {
+                    parts.push('Select passengers');
+                }
+                
+                document.querySelector('.passenger-text').textContent = parts.join(', ');
+                
+                // Update hidden inputs
+                document.querySelector('input[name="adults"]').value = adultCount;
+                document.querySelector('input[name="children"]').value = childrenCount;
+                document.querySelector('input[name="babies"]').value = babyCount;
+                
+                // Update display
+                document.getElementById('adult-count').textContent = adultCount;
+                document.getElementById('children-count').textContent = childrenCount;
+                document.getElementById('baby-count').textContent = babyCount;
+                
+                // Update minus button states
+                updateButtonStates();
+            }
+            
+            function updateButtonStates() {
+                document.querySelectorAll('.minus-btn').forEach(function(btn) {
+                    var type = btn.getAttribute('data-type');
+                    var count = 0;
+                    
+                    if (type === 'adult') count = adultCount;
+                    else if (type === 'children') count = childrenCount;
+                    else if (type === 'baby') count = babyCount;
+                    
+                    btn.disabled = count === 0;
+                });
+            }
+            
+            document.querySelectorAll('.plus-btn').forEach(function(btn) {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    var type = this.getAttribute('data-type');
+                    
+                    if (type === 'adult') {
+                        adultCount++;
+                    } else if (type === 'children') {
+                        childrenCount++;
+                    } else if (type === 'baby') {
+                        babyCount++;
+                    }
+                    
+                    updatePassengerText();
+                });
+            });
+            
+            document.querySelectorAll('.minus-btn').forEach(function(btn) {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    var type = this.getAttribute('data-type');
+                    
+                    if (type === 'adult' && adultCount > 0) {
+                        adultCount--;
+                    } else if (type === 'children' && childrenCount > 0) {
+                        childrenCount--;
+                    } else if (type === 'baby' && babyCount > 0) {
+                        babyCount--;
+                    }
+                    
+                    updatePassengerText();
+                });
+            });
+            
+            updateButtonStates();
+            
+            document.querySelectorAll('.location-item').forEach(function(item) {
+                item.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    let value = this.getAttribute('data-value');
+                    let text = this.textContent;
+                    
+                    document.querySelector('.selected-location').textContent = text;
+                    document.querySelector('input[name="location"]').value = value;
+
+                    document.querySelectorAll('.location-item').forEach(function(i) {
+                        i.classList.remove('active-drop');
+                    });
+                    this.classList.add('active-drop');
+                    
+                    UIkit.dropdown(this.closest('.uk-dropdown')).hide();
+                });
+            });
+            
+            document.querySelectorAll('.hotel-type-item').forEach(function(item) {
+                item.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    let value = this.getAttribute('data-value');
+                    let text = this.textContent;
+                    
+                    document.querySelector('.selected-hotel-type').textContent = text;
+                    document.querySelector('input[name="hotel_type"]').value = value;
+
+                    document.querySelectorAll('.hotel-type-item').forEach(function(i) {
+                        i.classList.remove('active-drop');
+                    });
+                    this.classList.add('active-drop');
+                    
+                    UIkit.dropdown(this.closest('.uk-dropdown')).hide();
+                });
+            });
+            
+            document.querySelectorAll('.price-item').forEach(function(item) {
+                item.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    let value = this.getAttribute('data-value');
+                    let text = this.textContent;
+                    
+                    document.querySelector('.selected-price').textContent = text;
+                    document.querySelector('input[name="price"]').value = value;
+
+                    document.querySelectorAll('.price-item').forEach(function(i) {
+                        i.classList.remove('active-drop');
+                    });
+                    this.classList.add('active-drop');
+                    
+                    UIkit.dropdown(this.closest('.uk-dropdown')).hide();
+                });
+            });
+            
+            document.querySelectorAll('.sortby-item').forEach(function(item) {
+                item.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    let value = this.getAttribute('data-value');
+                    let text = this.textContent;
+                    
+                    document.querySelector('.selected-sortby').textContent = text;
+                    document.querySelector('input[name="sort_by"]').value = value;
+
+                    document.querySelectorAll('.sortby-item').forEach(function(i) {
+                        i.classList.remove('active-drop');
+                    });
+                    this.classList.add('active-drop');                
+                    
+                    UIkit.dropdown(this.closest('.uk-dropdown')).hide();
+                });
+            });
+
+            function handleCheckinChange() {
+                const checkin  = document.getElementById('checkin');
+                const checkout = document.getElementById('checkout');
+
+                checkin.addEventListener('change', function () {
+                    if (!checkin.value) return;
+
+                    const checkinDate = new Date(checkin.value);
+                    const checkoutDate = checkout.value ? new Date(checkout.value) : null;
+
+                    // set min checkout = checkin
+                    checkout.min = checkin.value;
+
+                    // nếu checkout <= checkin -> +1 ngày
+                    if (!checkoutDate || checkoutDate <= checkinDate) {
+                        const nextDay = new Date(checkinDate);
+                        nextDay.setDate(nextDay.getDate() + 1);
+                        checkout.value = nextDay.toISOString().split('T')[0];
+                    }
+                });
+            }
+            handleCheckinChange();
+
+
+            const form = document.querySelector('.hotel-search-form');
+            form.addEventListener('reset', function () {
+                setTimeout(() => {
+
+                    const today = new Date();
+                    const tomorrow = new Date(today);
+                    tomorrow.setDate(today.getDate() + 1);
+
+                    const checkin = document.getElementById('checkin');
+                    const checkout = document.getElementById('checkout');
+
+                    checkin.value = today.toISOString().split('T')[0];
+                    checkout.value = tomorrow.toISOString().split('T')[0];
+                    checkout.min = checkin.value;
+
+                    /* ===== PASSENGER ===== */
+                    adultCount = 2;
+                    childrenCount = 1;
+                    babyCount = 0;
+                    updatePassengerText();
+
+                    /* ===== LOCATION ===== */
+                    document.querySelector('.selected-location').textContent = 'Select';
+                    document.querySelector('input[name="location"]').value = '';
+
+                    /* ===== HOTEL TYPE ===== */
+                    document.querySelector('.selected-hotel-type').textContent = 'Room Hotel';
+                    document.querySelector('input[name="hotel_type"]').value = '';
+
+                    /* ===== PRICE ===== */
+                    document.querySelector('.selected-price').textContent = 'From 400,000 VND';
+                    document.querySelector('input[name="price"]').value = '';
+
+                    /* ===== SORT ===== */
+                    document.querySelector('.selected-sortby').textContent = 'New';
+                    document.querySelector('input[name="sort_by"]').value = 'new';
+
+                    /* ===== REMOVE ACTIVE STATE ===== */
+                    document.querySelectorAll('.active-drop').forEach(el => {
+                        el.classList.remove('active-drop');
+                    });
+
+                }, 0);
+            });
+
+        });
+    </script>
+    
+    <?php
+    return ob_get_clean();
+}
+add_shortcode('hotel_search_form', 'hotel_search_form_shortcode');
