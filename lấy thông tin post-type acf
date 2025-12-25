@@ -1,0 +1,41 @@
+add_action('wp_footer', function() {
+    if (!is_admin()) {
+        $post_type = 'room-types'; // thay bằng post type bạn muốn
+        $field_groups = acf_get_field_groups(array('post_type' => $post_type));
+
+        if ($field_groups) {
+            echo '<div style="background:#fff; padding:20px; margin-top:20px; border:1px solid #ccc;">';
+            echo '<h3>ACF schema cho post type: ' . esc_html($post_type) . '</h3>';
+
+            foreach ($field_groups as $group) {
+                echo '<h4>Field Group: ' . esc_html($group['title']) . '</h4>';
+                $fields = acf_get_fields($group['key']);
+                if ($fields) {
+                    echo '<ul>';
+                    print_acf_fields_recursive($fields);
+                    echo '</ul>';
+                }
+            }
+
+            echo '</div>';
+        }
+    }
+});
+
+function print_acf_fields_recursive($fields) {
+    foreach ($fields as $field) {
+        echo '<li>'
+            . esc_html($field['label'])
+            . ' (<code>' . esc_html($field['name']) . '</code>)'
+            . ' | type: ' . esc_html($field['type']);
+
+        // Nếu có sub-fields thì in tiếp
+        if (!empty($field['sub_fields'])) {
+            echo '<ul>';
+            print_acf_fields_recursive($field['sub_fields']);
+            echo '</ul>';
+        }
+
+        echo '</li>';
+    }
+}
