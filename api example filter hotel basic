@@ -1,0 +1,288 @@
+<?php
+add_action('rest_api_init', 'register_hotel_location_api');
+function register_hotel_location_api() {
+    register_rest_route('hotel/v1', '/filters', array(
+        'methods' => 'GET',
+        'callback' => 'get_hotels_by_filters',
+        'permission_callback' => '__return_true', // Public
+        'args' => array(
+            'location' => array(
+                'required' => false,
+                'validate_callback' => function($param) {
+                    return is_string($param);
+                }
+            ),
+            'hotel-type' => array(
+                'required' => false,
+                'sanitize_callback' => 'sanitize_text_field',
+            ),
+            'search' => array(
+                'required' => false,
+                'sanitize_callback' => 'sanitize_text_field',
+            ),
+            'price' => array(
+                'required' => false,
+                'sanitize_callback' => 'sanitize_text_field',
+            ),
+            'sort_by' => array(
+                'required' => false,
+                'default' => 'all',
+                'sanitize_callback' => 'sanitize_text_field',
+            ),
+            'adults' => array(
+                'required' => false,
+                'validate_callback' => function($param) {
+                    return is_numeric($param) && $param >= 0;
+                },
+                'sanitize_callback' => 'absint',
+            ),
+            'children' => array(
+                'required' => false,
+                'validate_callback' => function($param) {
+                    return is_numeric($param) && $param >= 0;
+                },
+                'sanitize_callback' => 'absint',
+            ),
+            'babies' => array(
+                'required' => false,
+                'validate_callback' => function($param) {
+                    return is_numeric($param) && $param >= 0;
+                },
+                'sanitize_callback' => 'absint',
+            ),
+            'checkin' => array(
+                'required' => false,
+                'validate_callback' => function($param) {
+                    return preg_match('/^\d{8}$/', $param); // định dạng Ymd: 20251228
+                },
+                'sanitize_callback' => 'sanitize_text_field',
+                'description' => 'Check-in date in Ymd format'
+            ),
+            'checkout' => array(
+                'required' => false,
+                'validate_callback' => function($param) {
+                    return preg_match('/^\d{8}$/', $param);
+                },
+                'sanitize_callback' => 'sanitize_text_field',
+                'description' => 'Check-out date in Ymd format'
+            ),
+            'per_page' => array(
+                'required' => false,
+                'default' => 12,
+                'validate_callback' => function($param) {
+                    return is_numeric($param);
+                }
+            )
+        )
+    ));
+}
+
+
+function get_hotels_by_filters($request) {
+    $params = $request->get_params();
+
+    $checkin  = $params['checkin'] ?? null;
+    $checkout = $params['checkout'] ?? null;
+    $has_date_filter = !empty($checkin) && !empty($checkout);
+
+    /* ======================= Base query ======================= */
+    $args = array(
+        'post_type' => 'hotel',
+        'post_status' => 'publish',
+        'posts_per_page' => intval($params['per_page'] ?? 12),
+    );
+
+    /* ======================= TAX QUERY ======================= */
+    $tax_query = array('relation' => 'AND');
+
+    if (!empty($params['location'])) {
+        $tax_query[] = array(
+            'taxonomy' => 'location',
+            'field' => 'slug',
+            'terms'=> $params['location'],
+        );
+    }
+
+    if (!empty($params['hotel_type'])) {
+        $tax_query[] = array(
+            'taxonomy' => 'hotel-type',
+            'field' => 'slug',
+            'terms' => $params['hotel_type'],
+        );
+    }
+
+    if (count($tax_query) > 1) {
+        $args['tax_query'] = $tax_query;
+    }
+
+    if (!empty($params['search'])) {
+        $args['s'] = $params['search'];
+    }
+
+    
+
+    /* ======================= META QUERY ======================= */
+    $meta_query = array('relation' => 'AND');
+
+    if (!empty($params['price'])) {
+        switch ($params['price']) {
+            case 'under_500k':
+                $meta_query[] = array(
+                    'key' => 'basic_information_min_price',
+                    'value' => 500000,
+                    'type' => 'NUMERIC',
+                    'compare' => '<'
+                );
+                break;
+
+            case '500k_2m':
+                $meta_query[] = array(
+                    'key' => 'basic_information_min_price',
+                    'value' => array(500000, 2000000),
+                    'type' => 'NUMERIC',
+                    'compare' => 'BETWEEN'
+                );
+                break;
+
+            case 'over_2m':
+                $meta_query[] = array(
+                    'key' => 'basic_information_min_price',
+                    'value' => 2000000,
+                    'type' => 'NUMERIC',
+                    'compare' => '>'
+                );
+                break;
+        }
+    }
+
+    switch ($params['sort_by']) {
+        case 'lowest_price':
+            $args['meta_key'] = 'basic_information_min_price';
+            $args['orderby']  = 'meta_value_num';
+            $args['order']    = 'ASC';
+            break;
+
+        case 'highest_price':
+            $args['meta_key'] = 'basic_information_min_price';
+            $args['orderby']  = 'meta_value_num';
+            $args['order']    = 'DESC';
+            break;
+
+        case 'hot':
+            $meta_query[] = array(
+                'key' => 'rating_and_status_is_hot',
+                'value' => '1',
+            );
+            $args['orderby'] = 'date';
+            $args['order'] = 'ASC';
+            break;
+
+        case 'new':
+            $meta_query[] = array(
+                'key' => 'rating_and_status_is_new',
+                'value' => '1',
+            );
+            $args['orderby'] = 'date';
+            $args['order'] = 'ASC';
+            break;
+
+        case 'all':
+            $args['orderby'] = 'date';
+            $args['order'] = 'DESC';
+            break;
+    }
+
+    /* ======================= PASSENGER CAPACITY ======================= */
+    if (!empty($params['adults']) || !empty($params['children']) || !empty($params['babies'])) {
+        
+        if (!empty($params['adults'])) {
+            $meta_query[] = array(
+                'key' => 'hotel_max_adults',
+                'value' => intval($params['adults']),
+                'type' => 'NUMERIC',
+                'compare' => '>='
+            );
+        }
+        
+        if (!empty($params['children'])) {
+            $meta_query[] = array(
+                'key' => 'hotel_max_children',
+                'value' => intval($params['children']),
+                'type' => 'NUMERIC',
+                'compare' => '>='
+            );
+        }
+        
+        if (!empty($params['babies'])) {
+            $meta_query[] = array(
+                'key' => 'hotel_max_babies',
+                'value' => intval($params['babies']),
+                'type' => 'NUMERIC',
+                'compare' => '>='
+            );
+        }
+    }
+
+    if (count($meta_query) > 1) {
+        $args['meta_query'] = $meta_query;
+    }
+
+
+    $query = new WP_Query($args);
+
+
+    $response = array(
+        'success' => true,
+        'data' => array(
+            'hotels' => array(),
+            'total'  => $query->found_posts,
+            'filters' => array(
+                'location'   => $params['location'] ?? '',
+                'hotel_type' => $params['hotel_type'] ?? '',
+                'price'      => $params['price'] ?? '',
+                'sort_by'    => $params['sort_by'] ?? 'all',
+                'search'     => $params['search'] ?? '',
+                'adults'     => $params['adults'] ?? '',
+                'children'   => $params['children'] ?? '',
+                'babies'     => $params['babies'] ?? '',
+                'checkin'    => $checkin ?? '',
+                'checkout'   => $checkout ?? '',
+            )
+        )
+    );
+
+    if ($query->have_posts()) {
+        while ($query->have_posts()) {
+            $query->the_post();
+            $post_id = get_the_ID();
+
+            $basic_info  = get_field('basic_information', $post_id);
+            $rating_info = get_field('rating_and_status', $post_id);
+
+            $locations = get_the_terms($post_id, 'location');
+            $location_data = array();
+
+            if ($locations && !is_wp_error($locations)) {
+                foreach ($locations as $item) {
+                    $location_data[] = array(
+                        'name' => $item->name,
+                        'slug' => $item->slug
+                    );
+                }
+            }
+
+            $response['data']['hotels'][] = array(
+                'id'             => $post_id,
+                'title'          => get_the_title(),
+                'permalink'      => get_permalink(),
+                'featured_image' => get_the_post_thumbnail_url($post_id, 'full'),
+                'locations'      => $location_data,
+                'min_price'      => $basic_info['min_price'] ?? '',
+                'star_rating'    => $rating_info['star_rating'] ?? '',
+            );
+        }
+        wp_reset_postdata();
+    }
+
+    return new WP_REST_Response($response, 200);
+}
