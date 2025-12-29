@@ -1,0 +1,9 @@
+| Tình huống               | Dùng gì  |
+| ------------------------ | -------- |
+| Lấy post theo taxonomy   | WP_Query |
+| Filter meta đơn giản     | WP_Query |
+| Pagination               | WP_Query |
+| Sum / Count / Group      | SQL      |
+| Availability / inventory | SQL      |
+| Overlap ngày             | SQL      |
+| Báo cáo / dashboard      | SQL      |
